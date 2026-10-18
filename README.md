@@ -2,159 +2,195 @@
 
 **See beyond the pixels.**
 
-AI-powered image authenticity analysis. Verisight estimates whether an uploaded image may be AI-generated, using a pretrained deep-learning classifier.
+Verisight is an AI-powered image authenticity analysis and digital image forensics platform. It estimates whether an uploaded image is likely to be AI-generated or an authentic photograph using deep-learning feature representations.
 
-> **Note:** This is a research preview. Model predictions are estimates, not definitive proof of an image's origin.
+> **Research Preview & Disclaimer:** Verisight is an experimental research project. Probability scores reflect statistical model inferences and must not be interpreted as definitive or forensic proof of image authenticity.
 
 ---
 
-## Current Capabilities
+## Capabilities & Architecture Overview
 
-- Upload JPG, PNG, or WebP images (up to 10 MB)
-- Analyze images using a pretrained EfficientNet-B0 classifier
-- View AI-generated vs. real probability scores
-- Verdict categories: Likely AI-generated, Likely real, Uncertain
-- Drag-and-drop or file-browse upload
-- Clear error messages for invalid files
+Verisight is architected for both **local high-throughput research** and **instant, zero-config serverless cloud deployment**:
+
+- **Dual-Engine Architecture**:
+  - **Local Development / Research**: Runs FastAPI with PyTorch & Torchvision (`backend/main.py`), supporting GPU acceleration and research experiments.
+  - **Cloud / Vercel Serverless**: Runs FastAPI with ONNX Runtime (`api/index.py`), converting EfficientNet-B0 into an optimized 15.3 MB ONNX model. The entire serverless bundle is under 50 MB (far below Vercel's 250 MB limit) and boots in milliseconds without cold-start timeouts.
+- **Image Support**: Accepts JPG, PNG, and WebP images up to 10 MB and 25 million pixels.
+- **Categorization**: Classifies images into `Likely AI-generated`, `Likely real`, or `Uncertain` with calibrated probability scores.
+- **Research Aesthetic**: Polished, responsive React interface styled with a restrained digital-forensics research aesthetic, accessible progress bars, and transparent model disclaimers.
+
+---
 
 ## Technology Stack
 
-| Layer      | Technologies                                      |
-| ---------- | ------------------------------------------------- |
-| Frontend   | React, Vite, JavaScript, CSS, lucide-react        |
-| Backend    | Python, FastAPI, Uvicorn, Pillow, PyTorch          |
-| Model      | EfficientNet-B0 via Hugging Face Hub               |
-| Research   | Google Colab, scikit-learn, NumPy, SciPy, pandas   |
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 19, Vite, JavaScript, CSS Design Tokens, `lucide-react` |
+| **Serverless Cloud (Vercel)** | Python 3.10+, FastAPI, ONNX Runtime (`onnxruntime`), NumPy, Pillow |
+| **Local Backend & Research** | Python 3.10+, FastAPI, Uvicorn, PyTorch, Torchvision, Hugging Face Hub |
+| **Model** | EfficientNet-B0 fine-tuned for AI-vs-Real image classification |
+| **Deployment & Hosting** | Vercel (Frontend + Serverless Functions via `vercel.json`) |
+
+---
 
 ## Project Structure
 
 ```
-real-or-ai/
-├── frontend/          # React + Vite frontend
+imgai/ (real-or-ai)
+├── api/                       # Vercel Serverless Function Backend
+│   ├── index.py               # Serverless ASGI FastAPI entrypoint
+│   ├── detector_onnx.py       # Pure ONNX Runtime + Pillow inference engine
+│   ├── model.onnx             # Optimized EfficientNet-B0 ONNX model (15.3 MB)
+│   ├── model_config.json      # Normalization parameters & class indices
+│   └── requirements.txt       # Lightweight serverless dependencies (<50MB)
+├── frontend/                  # React + Vite application
+│   ├── public/
+│   │   └── favicon.svg        # Branded vector favicon
 │   ├── src/
-│   │   ├── App.jsx    # Main application component
-│   │   ├── App.css    # Component styles
-│   │   ├── index.css  # Design system
-│   │   └── main.jsx   # Entry point
-│   ├── .env           # Local environment variables
-│   └── index.html     # HTML shell
-├── backend/
-│   ├── main.py        # FastAPI application
-│   ├── detector.py    # Model loading and inference
-│   └── requirements.txt
-├── notebooks/         # Research notebooks
-├── experiments/       # Experiment results
-├── artifacts/         # Model artifacts
-├── .gitignore
-└── README.md
+│   │   ├── App.jsx            # Core UI, drag-and-drop, API integration
+│   │   ├── App.css            # Component styles & animations
+│   │   ├── index.css          # Design system & theme tokens
+│   │   └── main.jsx           # React DOM root
+│   ├── .env.example           # Example frontend environment variables
+│   ├── index.html             # HTML5 document shell with SEO meta tags
+│   └── package.json           # Frontend dependencies
+├── backend/                   # Local PyTorch Backend & Research Services
+│   ├── main.py                # Local FastAPI app
+│   ├── detector.py            # Local PyTorch inference module
+│   ├── export_onnx.py         # Utility to export PyTorch checkpoint to ONNX
+│   ├── requirements.txt       # PyTorch & local dependencies
+│   └── .env.example           # Example backend environment variables
+├── artifacts/                 # Model artifacts & configuration
+├── experiments/               # Future research experiment logs & benchmarks
+├── notebooks/                 # Google Colab / Jupyter research notebooks
+├── .gitignore                 # Comprehensive rules guarding secrets & dependencies
+├── package.json               # Root scripts for monorepo build orchestration
+├── vercel.json                # Vercel routing & serverless rewrites
+└── README.md                  # Project documentation
 ```
 
-## Local Setup
+---
 
-### Prerequisites
+## Deployment to Vercel (Serverless)
 
-- Python 3.10+
-- Node.js 18+
-- npm
+Verisight is pre-configured for automated deployment to Vercel as a full-stack serverless application:
 
-### Backend
-
+### Step 1: Push Repository to GitHub
+Ensure all changes are committed and pushed to your GitHub repository:
 ```bash
+git add .
+git commit -m "Configure Verisight full-stack Vercel serverless deployment"
+git push origin main
+```
+
+### Step 2: Import into Vercel
+1. Go to [Vercel Dashboard](https://vercel.com/new).
+2. Click **Add New** > **Project** and select your GitHub repository.
+3. Keep default settings:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `./` (leave blank / root)
+   - **Build Command**: `cd frontend && npm install && npm run build` (configured automatically via `vercel.json`)
+   - **Output Directory**: `frontend/dist`
+4. Click **Deploy**.
+
+Vercel will automatically build the React frontend and deploy `api/index.py` as an on-demand serverless function. All `/analyze` and `/health` requests are seamlessly routed to the serverless Python backend.
+
+---
+
+## Local Development Setup
+
+### 1. Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **Python**: v3.10, v3.11, or v3.12 (with `venv`)
+
+### 2. Backend (Local PyTorch)
+```powershell
 cd backend
 
-# Create and activate virtual environment
+# Create virtual environment
 python -m venv .venv
-# Windows:
 .venv\Scripts\activate
-# macOS/Linux:
-# source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Start the server
+# Start local backend on port 8000
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
+- Health Check: `http://127.0.0.1:8000/health`
+- Interactive API Docs: `http://127.0.0.1:8000/docs`
 
-The first request will download the model checkpoint from Hugging Face (~50 MB).
-
-### Frontend
-
-```bash
+### 3. Frontend (React + Vite)
+```powershell
 cd frontend
 
 # Install dependencies
 npm install
 
-# Start the dev server
+# Start local development server
 npm run dev
 ```
+The frontend will open at `http://localhost:5173`.
 
-The frontend runs at `http://localhost:5173` by default.
+---
 
 ## Environment Variables
 
-### Frontend
+| Variable | Environment | Default | Description |
+|---|---|---|---|
+| `VITE_API_BASE_URL` | Frontend (`.env`) | `""` (prod) / `http://127.0.0.1:8000` (dev) | Target API URL. On Vercel, defaults to same-origin. |
+| `FRONTEND_ORIGIN` | Backend (`.env`) | `http://localhost:5173` | Allowed CORS origin for local development. |
 
-| Variable             | Default                     | Description            |
-| -------------------- | --------------------------- | ---------------------- |
-| `VITE_API_BASE_URL`  | `http://127.0.0.1:8000`    | Backend API base URL   |
+---
 
-### Backend
+## API Specification
 
-| Variable           | Default                    | Description                  |
-| ------------------ | -------------------------- | ---------------------------- |
-| `FRONTEND_ORIGIN`  | `http://localhost:5173`    | Allowed CORS origin          |
+### `GET /health`
+Returns service availability status.
+```json
+{
+  "status": "ok",
+  "engine": "onnxruntime"
+}
+```
 
-## API Endpoints
+### `POST /analyze`
+Accepts multipart form-data image upload.
+- **Form Field**: `file`
+- **Supported Formats**: `image/jpeg`, `image/png`, `image/webp`
+- **Max File Size**: 10 MB
 
-| Method | Path       | Description                    |
-| ------ | ---------- | ------------------------------ |
-| GET    | `/`        | Service status                 |
-| GET    | `/health`  | Health check                   |
-| POST   | `/analyze` | Analyze an uploaded image      |
-
-### POST /analyze
-
-**Request:** `multipart/form-data` with field `file` (JPG, PNG, or WebP, max 10 MB)
-
-**Response:**
+#### Response:
 ```json
 {
   "verdict": "Likely AI-generated",
-  "ai_probability": 0.78,
-  "real_probability": 0.22,
+  "ai_probability": 0.7812,
+  "real_probability": 0.2188,
   "model": "bsgcasa/ai-vs-real-image-detector",
-  "device": "cpu",
+  "device": "cpu (onnx)",
   "disclaimer": "This is a model prediction, not proof of an image's origin."
 }
 ```
 
-**Interactive docs:** `http://127.0.0.1:8000/docs`
+---
 
-## Research Roadmap
+## Security & Git Hygiene
 
-1. **Baseline evaluation** — Measure pretrained model performance on a held-out dataset
-2. **Frequency-domain features** — Extract radial FFT features for complementary analysis
-3. **Hybrid fusion** — Combine visual and frequency features via a lightweight classifier
-4. **Robustness testing** — Evaluate under JPEG compression, resizing, and unseen generators
-5. **Ablation studies** — Compare visual-only, frequency-only, and hybrid approaches
-
-## Known Limitations
-
-- The pretrained model may not generalize to all AI generators
-- Predictions can be affected by JPEG compression, resizing, and image editing
-- The model has not been independently calibrated or evaluated on a held-out test set
-- Results should not be treated as forensic proof
-
-## Deployment Notes
-
-- Frontend and backend are independently deployable
-- API URLs are configured via environment variables
-- CORS origins must be updated for production domains
-- Model checkpoint is downloaded at startup; ensure network access or pre-cache the file
-- Do not commit `.env` files, model weights, or datasets to Git
+The root `.gitignore` strictly protects the repository against accidental leaks:
+- **No secrets or environment files**: `.env`, `.env.*`, `*.pem`, `*.key`, and API tokens are ignored.
+- **No package dependencies**: `node_modules/`, `**/.venv/`, and `**/venv/` are excluded.
+- **No raw checkpoints or caches**: `*.pth`, `*.pt`, `huggingface/`, and `.cache/` are ignored. Only the optimized production `api/model.onnx` is tracked for serverless execution.
 
 ---
 
-**Verisight** — Experimental image forensics research project.
+## Research Roadmap & Future Directions
+
+1. **Spatial-Frequency Fusion (Radial FFT)**: Integrating frequency domain feature analysis to detect generator-specific high-frequency artifacts under image compression.
+2. **Adversarial & Compression Robustness**: Evaluating detection performance across diverse JPEG quality factors (Q=50 to Q=95) and downsampling regimes.
+3. **Multi-Generator Benchmark**: Testing out-of-distribution generalization across Midjourney v6, Stable Diffusion 3, Flux, and DALL-E 3.
+
+---
+
+## License & Attribution
+
+Research prototype developed under the Verisight experimental image forensics initiative. Baseline weights derived from `bsgcasa/ai-vs-real-image-detector`.

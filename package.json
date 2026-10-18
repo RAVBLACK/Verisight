@@ -1,0 +1,11 @@
+{
+  "name": "verisight",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Verisight — AI-powered image authenticity analysis",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && uvicorn main:app --reload --host 127.0.0.1 --port 8000"
+  }
+}

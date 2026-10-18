@@ -1,45 +1,173 @@
-# Environment
+# ==============================================================================
+# Verisight — Git Ignore Rules
+# Strictly prevents credentials, virtual environments, node modules, model
+# weights, cache, build artifacts, and dataset files from leaking to Git.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment Variables & Secrets (CRITICAL)
+# ------------------------------------------------------------------------------
 .env
 .env.*
+*.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+*.env.staging
+*.env.production
 !.env.example
+!**/.env.example
 
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-*.egg
-dist/
-build/
-.venv/
-venv/
-env/
+# Credentials, tokens, keys & certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.pkcs12
+*credentials*
+*secret*
+token*.json
+auth*.json
+id_rsa*
+id_ed25519*
 
-# Node
+# ------------------------------------------------------------------------------
+# 2. Dependencies & Package Managers
+# ------------------------------------------------------------------------------
+# Node.js
 node_modules/
-frontend/dist/
+**/node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
 
-# Model weights / large files
+# Python Virtual Environments
+.venv/
+**/.venv/
+venv/
+**/venv/
+env/
+**/env/
+ENV/
+env.bak/
+venv.bak/
+
+# ------------------------------------------------------------------------------
+# 3. Python Cache, Bytecode & Build Artifacts
+# ------------------------------------------------------------------------------
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ------------------------------------------------------------------------------
+# 4. Frontend Build Artifacts
+# ------------------------------------------------------------------------------
+frontend/dist/
+dist/
+dist-ssr/
+*.local
+.vercel
+.output/
+
+# ------------------------------------------------------------------------------
+# 5. Model Weights, Checkpoints & Large Data Files
+# ------------------------------------------------------------------------------
+# Checkpoints & weights (never commit weights to GitHub)
 *.pth
 *.pt
-*.onnx
-*.h5
-*.pkl
+*.ckpt
 *.bin
+*.safetensors
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+!api/model.onnx
+!api/model_config.json
 
-# OS
+# Local Hugging Face / PyTorch caches
+.cache/
+**/.cache/
+cache/
+huggingface/
+backend/.cache/
+
+# Datasets
+datasets/
+data/
+raw_data/
+processed_data/
+*.csv
+*.tsv
+*.parquet
+*.feather
+*.h5
+
+# ------------------------------------------------------------------------------
+# 6. Logs & Debugging
+# ------------------------------------------------------------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# 7. Operating System & Editor Files
+# ------------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# IDE
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 *.swp
 *.swo
-
-# Logs
-*.log
-
-# Datasets (if stored locally)
-datasets/
-data/
+*~

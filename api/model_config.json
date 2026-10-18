@@ -1,0 +1,19 @@
+{
+  "model_id": "bsgcasa/ai-vs-real-image-detector",
+  "img_size": 224,
+  "class_names": [
+    "ai_generated",
+    "real"
+  ],
+  "ai_index": 0,
+  "normalize_mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "normalize_std": [
+    0.229,
+    0.224,
+    0.225
+  ]
+}
