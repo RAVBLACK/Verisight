@@ -5,6 +5,8 @@
 Verisight is an AI-powered image authenticity analysis and digital image forensics platform. It estimates whether an uploaded image is likely to be AI-generated or an authentic photograph using deep-learning feature representations.
 
 > **Research Preview & Disclaimer:** Verisight is an experimental research project. Probability scores reflect statistical model inferences and must not be interpreted as definitive or forensic proof of image authenticity.
+>
+> 📖 **Full System Architecture & Documentation**: See [PROJECT_DOCUMENTATION.md](file:///c:/Users/rakes/Downloads/imgai/PROJECT_DOCUMENTATION.md) for in-depth problem background, neural architecture, security protections, and the complete future research roadmap.
 
 ---
 
